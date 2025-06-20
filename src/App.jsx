@@ -35,7 +35,7 @@ const Navbar = () => {
             transition={{ duration: 0.8 }}
             className="text-2xl font-serif tracking-widest"
           >
-            ÉTHER
+            utsav
           </motion.div>
 
           {/* Desktop Navigation */}

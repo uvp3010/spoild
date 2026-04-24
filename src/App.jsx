@@ -1,279 +1,260 @@
 import React, { useState, useEffect } from 'react';
 
-const App= () => {
-  // Set the lock date: 6 months from when the page first loads
-  const [lockDate] = useState(() => {
+const TimeCapsulePage = () => {
+  // Set target date: 6 months from now
+  const [targetDate] = useState(() => {
     const date = new Date();
     date.setMonth(date.getMonth() + 6);
     return date;
   });
   
-  const [timeLeft, setTimeLeft] = useState(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [capsuleMessage, setCapsuleMessage] = useState('');
-  
-  // Replace this with your secret message
-  const SECRET_MESSAGE = "🎉 Congratulations! 🎉\n\nSix months have passed since you locked this time capsule.\n\nThis is your message from the past. Whatever goal, hope, or memory you left here, remember how far you've come. The future is bright! 🌟";
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   
   useEffect(() => {
-    // Check if already unlocked in localStorage
-    const storedUnlock = localStorage.getItem('timeCapsuleUnlocked');
-    const storedMessage = localStorage.getItem('timeCapsuleMessage');
-    
-    if (storedUnlock === 'true' && storedMessage) {
-      setIsUnlocked(true);
-      setCapsuleMessage(storedMessage);
-      setTimeLeft(null);
-      return;
-    }
-    
-    // Check if current date is past lock date
-    const now = new Date();
-    if (now >= lockDate) {
-      // Unlock the capsule
-      setIsUnlocked(true);
-      setCapsuleMessage(SECRET_MESSAGE);
-      localStorage.setItem('timeCapsuleUnlocked', 'true');
-      localStorage.setItem('timeCapsuleMessage', SECRET_MESSAGE);
-      setTimeLeft(null);
-    } else {
-      // Calculate remaining time
-      const diff = lockDate - now;
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (86400000)) / (3600000));
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = targetDate - now;
+      
+      if (difference <= 0) {
+        // Time's up! Message can be displayed
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (86400000)) / (3600000));
+      const minutes = Math.floor((difference % 3600000) / 60000);
+      const seconds = Math.floor((difference % 60000) / 1000);
       
       setTimeLeft({ days, hours, minutes, seconds });
-    }
-  }, [lockDate]);
+    };
+    
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    
+    return () => clearInterval(timer);
+  }, [targetDate]);
   
-  // Update countdown every second
-  useEffect(() => {
-    if (!isUnlocked && timeLeft) {
-      const timer = setInterval(() => {
-        const now = new Date();
-        if (now >= lockDate) {
-          setIsUnlocked(true);
-          setCapsuleMessage(SECRET_MESSAGE);
-          localStorage.setItem('timeCapsuleUnlocked', 'true');
-          localStorage.setItem('timeCapsuleMessage', SECRET_MESSAGE);
-          setTimeLeft(null);
-          clearInterval(timer);
-        } else {
-          const diff = lockDate - now;
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff % (86400000)) / (3600000));
-          const minutes = Math.floor((diff % 3600000) / 60000);
-          const seconds = Math.floor((diff % 60000) / 1000);
-          setTimeLeft({ days, hours, minutes, seconds });
-        }
-      }, 1000);
-      
-      return () => clearInterval(timer);
-    }
-  }, [isUnlocked, lockDate, SECRET_MESSAGE]);
+  const isTimeUp = targetDate <= new Date();
   
-  // Style constants
+  // Beautiful gradient backgrounds
+  const getGradient = () => {
+    if (isTimeUp) {
+      return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+    return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  };
+  
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: getGradient(),
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      fontFamily: "'Poppins', 'Segoe UI', 'Roboto', sans-serif",
       padding: '20px',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    containerBefore: {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+      opacity: 0.1,
+      pointerEvents: 'none',
     },
     card: {
-      backgroundColor: 'white',
-      borderRadius: '20px',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-      padding: '40px',
-      maxWidth: '500px',
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(10px)',
+      borderRadius: '30px',
+      padding: '50px 40px',
+      maxWidth: '600px',
       width: '100%',
       textAlign: 'center',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      zIndex: 1,
+      transition: 'transform 0.3s ease',
+    },
+    icon: {
+      fontSize: '4rem',
+      marginBottom: '20px',
+      animation: isTimeUp ? 'bounce 1s ease infinite' : 'none',
     },
     title: {
       fontSize: '2.5rem',
-      color: '#333',
-      marginBottom: '10px',
+      fontWeight: 'bold',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      marginBottom: '15px',
     },
     subtitle: {
-      color: '#666',
+      fontSize: '1rem',
+      color: '#6b7280',
+      marginBottom: '40px',
+      lineHeight: '1.6',
+    },
+    countdownContainer: {
+      background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+      borderRadius: '20px',
+      padding: '30px',
       marginBottom: '30px',
     },
-    qrSection: {
-      margin: '30px 0',
-      padding: '20px',
-      backgroundColor: '#f5f5f5',
-      borderRadius: '15px',
-    },
-    qrLabel: {
-      fontSize: '0.9rem',
-      color: '#888',
-      marginBottom: '15px',
-      textTransform: 'uppercase',
-      letterSpacing: '1px',
-    },
-    qrImage: {
-      maxWidth: '200px',
-      height: 'auto',
-      margin: '0 auto',
-      display: 'block',
-      borderRadius: '10px',
-    },
-    countdown: {
-      marginTop: '30px',
-      padding: '20px',
-      backgroundColor: '#f0f0f0',
-      borderRadius: '15px',
-    },
-    timer: {
+    timerWrapper: {
       display: 'flex',
-      justifyContent: 'space-around',
-      marginTop: '20px',
-      gap: '10px',
+      justifyContent: 'center',
+      gap: '20px',
       flexWrap: 'wrap',
     },
-    timerBlock: {
-      textAlign: 'center',
-      minWidth: '70px',
-    },
-    timerNumber: {
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      color: '#667eea',
-    },
-    timerLabel: {
-      fontSize: '0.8rem',
-      color: '#888',
-      textTransform: 'uppercase',
-    },
-    lockedMessage: {
-      color: '#999',
-      fontStyle: 'italic',
-      marginTop: '20px',
-    },
-    unlockedMessage: {
-      marginTop: '30px',
-      padding: '25px',
-      backgroundColor: '#e8f5e9',
+    timeBlock: {
+      background: 'white',
       borderRadius: '15px',
-      borderLeft: '5px solid #4caf50',
+      padding: '20px',
+      minWidth: '100px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    timeNumber: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      lineHeight: 1,
+    },
+    timeLabel: {
+      fontSize: '0.8rem',
+      color: '#6b7280',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      marginTop: '10px',
+    },
+    messageBox: {
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      borderRadius: '20px',
+      padding: '30px',
+      color: 'white',
+      marginTop: '20px',
     },
     secretMessage: {
       fontSize: '1.2rem',
-      lineHeight: '1.6',
-      color: '#2e7d32',
-      whiteSpace: 'pre-wrap',
-      fontFamily: 'inherit',
-    },
-    celebration: {
-      fontSize: '3rem',
+      lineHeight: '1.8',
       marginBottom: '15px',
+    },
+    lockIcon: {
+      marginBottom: '15px',
+    },
+    revealDate: {
+      fontSize: '0.9rem',
+      color: '#9ca3af',
+      marginTop: '20px',
     },
     footer: {
       marginTop: '30px',
       fontSize: '0.8rem',
-      color: '#aaa',
+      color: '#9ca3af',
     },
   };
   
   return (
     <div style={styles.container}>
+      <div style={styles.containerBefore} />
       <div style={styles.card}>
-        <h1 style={styles.title}>⏳ Time Capsule</h1>
-        <p style={styles.subtitle}>A message from the past, waiting for the right moment</p>
-        
-        {/* QR Code Section - Place your QR code image here */}
-        <div style={styles.qrSection}>
-          <div style={styles.qrLabel}>🔗 Scan to visit this capsule</div>
-          {/* 
-            REPLACE THIS WITH YOUR OWN QR CODE IMAGE
-            Remove the placeholder div and uncomment the img tag below
-            Add your QR code image file to the public folder or use a URL
-          */}
-          <div style={{ textAlign: 'center' }}>
-            {/* <img 
-              src="/your-qr-code.png" 
-              alt="Time Capsule QR Code" 
-              style={styles.qrImage}
-            /> */}
-            {/* Placeholder - Replace with your actual QR code image */}
-            <div style={{
-              ...styles.qrImage,
-              backgroundColor: '#333',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              width: '200px',
-              height: '200px',
-            }}>
-              YOUR QR CODE<br/>IMAGE HERE
-            </div>
-          </div>
-          <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '10px' }}>
-            Share this QR code so others can leave or view messages
-          </p>
+        <div style={styles.icon}>
+          {isTimeUp ? '🎉' : '⏰'}
         </div>
         
-        {!isUnlocked ? (
-          // Locked state - show countdown
-          <div style={styles.countdown}>
-            <h3>🔒 Capsule Locked</h3>
-            <p>This time capsule will open in:</p>
-            {timeLeft && (
-              <div style={styles.timer}>
-                <div style={styles.timerBlock}>
-                  <div style={styles.timerNumber}>{timeLeft.days}</div>
-                  <div style={styles.timerLabel}>Days</div>
+        <h1 style={styles.title}>
+          {isTimeUp ? "It's Time!" : "Time Capsule"}
+        </h1>
+        
+        <p style={styles.subtitle}>
+          {isTimeUp 
+            ? "Your wait is over! Here's your message from the past ✨" 
+            : "A special message is locked away, waiting for the right moment..."}
+        </p>
+        
+        {!isTimeUp ? (
+          <>
+            <div style={styles.countdownContainer}>
+              <div style={styles.timerWrapper}>
+                <div style={styles.timeBlock}>
+                  <div style={styles.timeNumber}>{String(timeLeft.days).padStart(2, '0')}</div>
+                  <div style={styles.timeLabel}>Days</div>
                 </div>
-                <div style={styles.timerBlock}>
-                  <div style={styles.timerNumber}>{timeLeft.hours}</div>
-                  <div style={styles.timerLabel}>Hours</div>
+                <div style={styles.timeBlock}>
+                  <div style={styles.timeNumber}>{String(timeLeft.hours).padStart(2, '0')}</div>
+                  <div style={styles.timeLabel}>Hours</div>
                 </div>
-                <div style={styles.timerBlock}>
-                  <div style={styles.timerNumber}>{timeLeft.minutes}</div>
-                  <div style={styles.timerLabel}>Mins</div>
+                <div style={styles.timeBlock}>
+                  <div style={styles.timeNumber}>{String(timeLeft.minutes).padStart(2, '0')}</div>
+                  <div style={styles.timeLabel}>Minutes</div>
                 </div>
-                <div style={styles.timerBlock}>
-                  <div style={styles.timerNumber}>{timeLeft.seconds}</div>
-                  <div style={styles.timerLabel}>Secs</div>
+                <div style={styles.timeBlock}>
+                  <div style={styles.timeNumber}>{String(timeLeft.seconds).padStart(2, '0')}</div>
+                  <div style={styles.timeLabel}>Seconds</div>
                 </div>
               </div>
-            )}
-            <p style={styles.lockedMessage}>
-              💭 A secret message is waiting for you inside...
-            </p>
-            <p style={{ fontSize: '0.8rem', marginTop: '15px', color: '#999' }}>
-              The capsule will open automatically on <strong>{lockDate.toLocaleDateString()}</strong>
-            </p>
-          </div>
-        ) : (
-          // Unlocked state - show the secret message
-          <div style={styles.unlockedMessage}>
-            <div style={styles.celebration}>🎉🔓</div>
-            <h3 style={{ color: '#2e7d32', marginBottom: '15px' }}>
-              The Time Capsule Has Opened!
-            </h3>
-            <div style={styles.secretMessage}>
-              {capsuleMessage}
             </div>
-            <p style={{ marginTop: '20px', fontSize: '0.9rem', color: '#555' }}>
-              ⏰ This message was locked away for 6 months. Today is the day it was meant to be read.
+            
+            <div style={styles.lockIcon}>🔒</div>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+              This capsule will open automatically after the timer reaches zero
             </p>
+            <p style={styles.revealDate}>
+              📅 Reveal date: {targetDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+          </>
+        ) : (
+          <div style={styles.messageBox}>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>📜</div>
+            <div style={styles.secretMessage}>
+              🎊 Congratulations! 🎊
+              <br /><br />
+              Six months have passed since you locked this time capsule.
+              <br /><br />
+              Time flies when you're growing, learning, and becoming the person you're meant to be.
+              <br /><br />
+              Whatever brought you here today — a goal, a dream, a memory — remember that every moment matters.
+              <br /><br />
+              Keep looking forward, but never forget how far you've come.
+              <br /><br />
+              🌟 The future is bright! 🌟
+            </div>
           </div>
         )}
         
         <div style={styles.footer}>
-          ⏰ Time Capsule • Messages locked for 6 months
+          ⚡ Time Capsule • {isTimeUp ? "Unlocked" : "Locked for 6 months"}
         </div>
       </div>
+      
+      <style>
+        {`
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+          }
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        `}
+      </style>
     </div>
   );
 };
 
-export default App;
+export default TimeCapsulePage;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const App= () => {
+const  App = () => {
   // Set target date to October 30 of current year or next year
   const [targetDate] = useState(() => {
     const date = new Date();

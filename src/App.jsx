@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function TimeCapsule() {
+export default function App() {
   const [message, setMessage] = useState("");
   const [capsule, setCapsule] = useState(null);
   const [currentTime, setCurrentTime] = useState(Date.now());

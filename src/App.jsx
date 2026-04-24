@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-const TimeCapsulePage = () => {
-  // Set target date: 6 months from now
+const App= () => {
+  // Set target date to October 30 of current year or next year
   const [targetDate] = useState(() => {
     const date = new Date();
-    date.setMonth(date.getMonth() + 6);
-    return date;
+    const currentYear = date.getFullYear();
+    let targetYear = currentYear;
+    
+    // If we're past October 30 this year, set to next year
+    if (date > new Date(currentYear, 9, 30)) { // Month is 0-indexed, so October is 9
+      targetYear = currentYear + 1;
+    }
+    
+    return new Date(targetYear, 9, 30, 23, 59, 59); // October 30 at 11:59:59 PM
   });
   
   const [timeLeft, setTimeLeft] = useState({
@@ -28,7 +35,7 @@ const TimeCapsulePage = () => {
       
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (86400000)) / (3600000));
-      const minutes = Math.floor((difference % 3600000) / 60000);
+      const minutes = Math.floor((difference % 3600000) / 60000));
       const seconds = Math.floor((difference % 60000) / 1000);
       
       setTimeLeft({ days, hours, minutes, seconds });
@@ -42,18 +49,10 @@ const TimeCapsulePage = () => {
   
   const isTimeUp = targetDate <= new Date();
   
-  // Beautiful gradient backgrounds
-  const getGradient = () => {
-    if (isTimeUp) {
-      return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    }
-    return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-  };
-  
   const styles = {
     container: {
       minHeight: '100vh',
-      background: getGradient(),
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -61,17 +60,6 @@ const TimeCapsulePage = () => {
       padding: '20px',
       position: 'relative',
       overflow: 'hidden',
-    },
-    containerBefore: {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-      opacity: 0.1,
-      pointerEvents: 'none',
     },
     card: {
       background: 'rgba(255, 255, 255, 0.95)',
@@ -83,12 +71,10 @@ const TimeCapsulePage = () => {
       textAlign: 'center',
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       zIndex: 1,
-      transition: 'transform 0.3s ease',
     },
     icon: {
       fontSize: '4rem',
       marginBottom: '20px',
-      animation: isTimeUp ? 'bounce 1s ease infinite' : 'none',
     },
     title: {
       fontSize: '2.5rem',
@@ -154,6 +140,7 @@ const TimeCapsulePage = () => {
     },
     lockIcon: {
       marginBottom: '15px',
+      fontSize: '2rem',
     },
     revealDate: {
       fontSize: '0.9rem',
@@ -165,24 +152,29 @@ const TimeCapsulePage = () => {
       fontSize: '0.8rem',
       color: '#9ca3af',
     },
+    autumnLeaves: {
+      position: 'absolute',
+      fontSize: '2rem',
+      opacity: 0.1,
+      pointerEvents: 'none',
+    },
   };
   
   return (
     <div style={styles.container}>
-      <div style={styles.containerBefore} />
       <div style={styles.card}>
         <div style={styles.icon}>
-          {isTimeUp ? '🎉' : '⏰'}
+          {isTimeUp ? '🎃🍂' : '🍁⏰'}
         </div>
         
         <h1 style={styles.title}>
-          {isTimeUp ? "It's Time!" : "Time Capsule"}
+          {isTimeUp ? "🎃 The Wait is Over! 🍂" : "Autumn Time Capsule"}
         </h1>
         
         <p style={styles.subtitle}>
           {isTimeUp 
-            ? "Your wait is over! Here's your message from the past ✨" 
-            : "A special message is locked away, waiting for the right moment..."}
+            ? "October 30th has arrived! Here's your message from the past 🎑" 
+            : "A special autumn message is locked away until October 30th..."}
         </p>
         
         {!isTimeUp ? (
@@ -208,53 +200,41 @@ const TimeCapsulePage = () => {
               </div>
             </div>
             
-            <div style={styles.lockIcon}>🔒</div>
+            <div style={styles.lockIcon}>🍂🔒🍁</div>
             <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
-              This capsule will open automatically after the timer reaches zero
+              This autumn capsule will open on October 30th
             </p>
             <p style={styles.revealDate}>
-              📅 Reveal date: {targetDate.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+              📅 Reveal date: <strong>October 30, {targetDate.getFullYear()}</strong>
+              <br />
+              🍎 Just in time for Halloween and autumn magic!
             </p>
           </>
         ) : (
           <div style={styles.messageBox}>
-            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>📜</div>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🎃🍂📜🍁🎑</div>
             <div style={styles.secretMessage}>
-              🎊 Congratulations! 🎊
+              ✨ Happy October 30th! ✨
               <br /><br />
-              Six months have passed since you locked this time capsule.
+              The leaves have fallen, the air is crisp, and the time has finally come.
               <br /><br />
-              Time flies when you're growing, learning, and becoming the person you're meant to be.
+              When you locked this message away, you were waiting for this very moment — a moment of reflection, growth, and discovery.
               <br /><br />
-              Whatever brought you here today — a goal, a dream, a memory — remember that every moment matters.
+              Whatever has happened in these past months, know that every season brings its own beauty. Like autumn, sometimes we need to let go of old leaves to make room for new growth.
               <br /><br />
-              Keep looking forward, but never forget how far you've come.
+              🍂 Embrace the change. Celebrate your journey. Keep moving forward. 🍁
               <br /><br />
-              🌟 The future is bright! 🌟
+              With love, from your past self 💫
             </div>
           </div>
         )}
         
         <div style={styles.footer}>
-          ⚡ Time Capsule • {isTimeUp ? "Unlocked" : "Locked for 6 months"}
+          🍁 Time Capsule • Revealing on October 30th • {isTimeUp ? "Unlocked" : "Locked"}
         </div>
       </div>
-      
-      <style>
-        {`
-          @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-          }
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        `}
-      </style>
     </div>
   );
 };
 
-export default TimeCapsulePage;
+export default App;

@@ -293,7 +293,7 @@ export default function App() {
         </div>
       </div>
 
-      <style>{`
+      <style>
         @keyframes starMove {
           0% { transform: translateY(0) translateX(0); }
           100% { transform: translateY(-200px) translateX(50px); }
@@ -342,7 +342,7 @@ export default function App() {
           0% { box-shadow: 0 0 0 0 cyan; border-color: cyan; background: rgba(0,255,255,0.3); }
           100% { box-shadow: 0 0 20px cyan; }
         }
-      `}</style>
+      </style>
     </div>
   );
 }
